@@ -5,150 +5,57 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Geographic Information System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- MapLibre CDN -->
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css">
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+    
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-        }
-        #map {
-            width: 100%;
-            height: 100vh;
-        }
-        /* Panel pencarian wilayah */
-        #controls {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-        #searchBox {
-            width: 200px;
-            padding: 5px;
-        }
-        #suggestions {
-            position: absolute;
-            background: white;
-            width: 210px;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            display: none;
-            z-index: 1001;
-        }
-        .suggestion-item {
-            padding: 5px;
-            cursor: pointer;
-        }
-        .suggestion-item:hover {
-            background: #f0f0f0;
-        }
-        button {
-            display: block;
-            margin-top: 5px;
-            padding: 5px;
-            cursor: pointer;
-        }
-        /* Panel informasi pelanggan */
-        #floatingPanel {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            width: 280px;
-        }
-        .header {
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        #dateTime {
-            font-size: 12px;
-            text-align: center;
-            margin-top: 5px;
-        }
-        .status {
-            display: flex;
-            align-items: center;
-            padding: 5px;
-            background: #2ecc71;
-            color: white;
-            font-weight: bold;
-            border-radius: 5px;
-            margin: 5px 0;
-        }
-        .warning {
-            display: flex;
-            align-items: center;
-            padding: 5px;
-            background: #e74c3c;
-            color: white;
-            font-weight: bold;
-            border-radius: 5px;
-            margin: 5px 0;
-        }
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-top: 10px;
-        }
-        .buttons button {
-            padding: 8px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .green { background: #27ae60; color: white; }
-        .blue { background: #2980b9; color: white; }
-        .brown { background: #8e44ad; color: white; }
+        html, body, #map { width: 100%; height: 100vh; margin: 0; padding: 0; overflow: hidden; }
+        #controls, #floatingPanel { z-index: 1000; }
+        #suggestions { max-height: 150px; overflow-y: auto; }
     </style>
 </head>
 <body>
-
-    <!-- Panel pencarian wilayah -->
-    <div id="controls">
-        <input type="text" id="searchBox" placeholder="Cari wilayah..." onkeyup="fetchSuggestions()">
-        <div id="suggestions"></div>
-        <button onclick="toggleDrag()">🔒 Kunci Drag</button>
-    </div>
-
     <!-- Panel informasi pelanggan -->
-    <div id="floatingPanel">
-        <div class="header">
-            <img src="https://via.placeholder.com/120x40" alt="Logo" />
-            <div>STATUS PELANGGAN</div>
-            <div id="dateTime"></div>
+    <div id="floatingPanel" class="position-absolute bottom-0 start-0 m-2 p-2 bg-white shadow rounded" style="width: 220px; font-size: 14px;">
+        
+        <!-- Informasi Pelanggan -->
+        <div class="text-center mb-2">
+            <img src="https://via.placeholder.com/100x30" alt="Logo" class="mb-1">
+            <div class="fw-bold">STATUS PELANGGAN</div>
+            <small id="dateTime"></small>
         </div>
 
-        <div class="status">
-            🟢 Online <span>(1493/57)</span>
-        </div>
-        <div class="warning">
-            🔴 2 ❌ 29 ❌ 39
+        <!-- Pencarian Wilayah -->
+        <div class="mb-2">
+            <input type="text" id="searchBox" class="form-control form-control-sm" placeholder="Cari wilayah..." onkeyup="fetchSuggestions()">
+            <div id="suggestions" class="border rounded d-none mt-1 bg-white"></div>
         </div>
 
-        <div class="buttons">
-            <button class="green">Masa Berlaku Pelanggan</button>
-            <button class="blue">Mode Pengukuran</button>
-            <button class="brown" onclick="location.reload()">Refresh</button>
+        <!-- Pencarian Pelanggan -->
+        <div class="mb-2">
+            <input type="text" id="searchBox" class="form-control form-control-sm" placeholder="Cari Pelanggan..." onkeyup="fetchSuggestions()">
+            <div id="suggestions" class="border rounded d-none mt-1 bg-white"></div>
         </div>
+    
+        <div class="alert alert-success text-center p-1">🟢 Online <span>(1493/57)</span></div>
+        <div class="alert alert-danger text-center p-1">🔴 2 ❌ 29 ❌ 39</div>
+    
+        <!-- Tombol Aksi -->
+        <div class="d-grid gap-1">
+            <button class="btn btn-success btn-sm">Masa Berlaku</button>
+            <button class="btn btn-primary btn-sm">Mode Pengukuran</button>
+            <button class="btn btn-secondary btn-sm" onclick="location.reload()">Refresh</button>
+        </div>    
     </div>
+</body>
 
+    
     <!-- Peta GIS -->
     <div id="map"></div>
 
@@ -162,74 +69,43 @@
 
         map.addControl(new maplibregl.NavigationControl());
 
-        var marker = new maplibregl.Marker()
-            .setLngLat([106.8456, -6.2088])
-            .addTo(map);
-
+        var marker = new maplibregl.Marker().setLngLat([106.8456, -6.2088]).addTo(map);
         var isDragEnabled = true;
-
-        function toggleDrag() {
-            if (isDragEnabled) {
-                map.dragPan.disable();
-                alert("Drag dikunci");
-            } else {
-                map.dragPan.enable();
-                alert("Drag dibuka");
-            }
-            isDragEnabled = !isDragEnabled;
-        }
 
         function fetchSuggestions() {
             var query = document.getElementById('searchBox').value;
-            if (query.length < 2) {
-                document.getElementById('suggestions').style.display = 'none';
-                return;
-            }
-
-            var url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=h5adLjJFVSkLVNPeR0HM`;
-
-            fetch(url)
+            if (query.length < 2) return document.getElementById('suggestions').classList.add('d-none');
+            
+            fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=h5adLjJFVSkLVNPeR0HM`)
                 .then(response => response.json())
                 .then(data => {
                     var suggestionBox = document.getElementById('suggestions');
                     suggestionBox.innerHTML = '';
-                    if (data.features.length > 0) {
-                        data.features.forEach(place => {
-                            var item = document.createElement('div');
-                            item.className = 'suggestion-item';
-                            item.innerText = place.place_name;
-                            item.onclick = function() {
-                                selectLocation(place);
-                            };
-                            suggestionBox.appendChild(item);
-                        });
-                        suggestionBox.style.display = 'block';
-                    } else {
-                        suggestionBox.style.display = 'none';
-                    }
+                    data.features.forEach(place => {
+                        var item = document.createElement('div');
+                        item.className = 'p-2 border-bottom bg-light';
+                        item.innerText = place.place_name;
+                        item.onclick = () => selectLocation(place);
+                        suggestionBox.appendChild(item);
+                    });
+                    suggestionBox.classList.remove('d-none');
                 })
-                .catch(error => console.error("Error fetching suggestions:", error));
+                .catch(console.error);
         }
 
         function selectLocation(place) {
-            var lng = place.geometry.coordinates[0];
-            var lat = place.geometry.coordinates[1];
-
+            var [lng, lat] = place.geometry.coordinates;
             map.flyTo({ center: [lng, lat], zoom: 12 });
-
             marker.setLngLat([lng, lat]);
-
             document.getElementById('searchBox').value = place.place_name;
-            document.getElementById('suggestions').style.display = 'none';
+            document.getElementById('suggestions').classList.add('d-none');
         }
 
         function updateDateTime() {
-            const now = new Date();
-            document.getElementById('dateTime').innerText = now.toLocaleString();
+            document.getElementById('dateTime').innerText = new Date().toLocaleString();
         }
         setInterval(updateDateTime, 1000);
         updateDateTime();
     </script>
-
 </body>
 </html>
